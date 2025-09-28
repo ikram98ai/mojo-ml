@@ -1,3 +1,6 @@
+from gpu.host import DeviceContext
+from sys import has_accelerator
+
 def main():
     num_float16 = SIMD[DType.float16, 4](3.5, -3.5, 3.5, -3.5)
     denom_float16 = SIMD[DType.float16, 4](2.5, 2.5, -2.5, -2.5)
@@ -21,8 +24,6 @@ def main():
     var floor_quotient_int32 = num_int32 // denom_int32
     print("Floor int32 division:", floor_quotient_int32)
 
-    from gpu.host import DeviceContext
-    from sys import has_accelerator
 
     @parameter
     if not has_accelerator():

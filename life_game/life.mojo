@@ -3,7 +3,7 @@ from python import Python
 import time
 
 def run_display(
-    owned grid: Grid,
+    var grid: Grid,
     window_height: Int = 600,
     window_width: Int = 600,
     background_color: String = "black",
@@ -60,4 +60,4 @@ def run_display(
 
 def main():
     start = Grid.random(128, 128)
-    run_display(start)
+    run_display(start^)
