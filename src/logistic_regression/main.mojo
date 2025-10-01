@@ -19,48 +19,79 @@ def load_data(file_path:String)-> Tuple[List[row_type], List[Float32]]:
     
     return features^, labels^
 
-fn sigmoid(z: Float32)-> Float32:
-    return 1/( 1 + math.exp(-z))
 
-fn train_logistic(features:List[row_type], labels: List[Float32], mut w: row_type, mut b: Float32, lr: Float32 = 0.0001):
-    var dw = row_type()
-    var db = Float32(0)
-    var m = len(features)
+struct LogisticRegression:
+    var w:row_type
+    var b:Float32
+    var lr: Float32
+    var iter: Int
 
-    for x,y in zip(features,labels):
-        z = (x*w).reduce_add() + b
-        a = sigmoid(z)
-        err = -(y * math.log(a)) - (1-y)*(1-math.log(a))
+    fn __init__(out self, lr: Float32 = 0.0001, iter: Int = 10):
+        self.lr = lr
+        self.iter = iter
+        self.w = row_type(0,0,0,0,0,0,0,0)
+        self.b = Float32(0)
 
-        dw += err * x
-        db += err
+    fn _sigmoid(self, z: Float32)-> Float32:
+        return 1/( 1 + math.exp(-z))
+
+    fn __call__(self, x:row_type)-> Float32:
+        z = (x * self.w).reduce_add() + self.b
+        a = self._sigmoid(z)
+        return a
     
-    w -= lr*(dw/m)
-    b -= lr*(db/m)
+    fn __call__(self, batch:List[row_type])-> List[Float32]:
+        var preds:List[Float32] = List[Float32]()
+        for x in batch:
+            z = (x * self.w).reduce_add() + self.b
+            a = self._sigmoid(z)
+            preds.append(a)
+        return preds^
 
-fn loss_fn(features:List[row_type], labels: List[Float32], mut w: row_type, mut b: Float32)->Float32:
-    var m = len(features)
-    var cost_sum = Float32(0)
+    fn fit(mut self, X:List[row_type], Y: List[Float32]):
+        var dw = row_type()
+        var db = Float32(0)
+        var m = len(X)
+        for i in range(self.iter):
+            for x,y in zip(X,Y):
+                z = (x*self.w).reduce_add() + self.b
+                a = self._sigmoid(z)
+                err = -(y * math.log(a)) - (1-y)*(1-math.log(a))
 
-    for x,y in zip(features,labels):
-        z = (x*w).reduce_add() + b
-        a = sigmoid(z)
-        cost_sum += -(y * math.log(a)) - (1-y)*(1-math.log(a))
+                dw += err * x
+                db += err
+            
+            self.w -= self.lr*(dw/m)
+            self.b -= self.lr*(db/m)
 
-    cost_sum /= m
-    return cost_sum
+            loss = self.loss_fn(X,Y)
+            if (i+1)%10 == 0:
+                try:
+                    print(String("Epoch#{}; Loss:{}").format(i,loss))
+                except: 
+                    print("Unknow error")
+
+
+
+    fn loss_fn(self, X:List[row_type], Y: List[Float32])->Float32:
+        var m = len(X)
+        var cost_sum = Float32(0)
+
+        for x,y in zip(X,Y):
+            z = (x*self.w).reduce_add() + self.b
+            a = self._sigmoid(z)
+            cost_sum += -(y * math.log(a)) - (1-y)*(1-math.log(a))
+
+        cost_sum /= m
+        return cost_sum
 
 
 def main():
     data = load_data("./././data/heart_disease.csv")
     features = data[0].copy()
-    lables = data[1].copy()
+    labels = data[1].copy()
 
-    var w = row_type(0,0,0,0,0,0,0,0)
-    var b = Float32(0)
+    var model: LogisticRegression = LogisticRegression(lr=0.000001, iter=100)
+    model.fit(features, labels)
 
-    for i in range(10):
-        train_logistic(features, lables, w, b)
-        loss = loss_fn(features, lables, w, b)
-        print(String("Epoch#{}; Loss:{}; w:{}; b:{}").format(i,loss,w,b))
-        
+    print(model(features[:5]).__str__())
