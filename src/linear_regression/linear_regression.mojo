@@ -53,7 +53,7 @@ def main():
     var features: List[SIMD[DType.float32, width]] 
     var labels: List[Float32]
 
-    data = load_data("././data/heart_disease.csv")   
+    data = load_data("./././data/heart_disease.csv")   
     var w = SIMD[DType.float32, width](0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
     var b = Float32(0.0)
     features = data[0].copy()

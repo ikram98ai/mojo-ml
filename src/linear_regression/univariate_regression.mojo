@@ -43,7 +43,7 @@ def main():
     var features: List[Float32]
     var labels: List[Float32]
 
-    data = read_data("././data/property_sales.csv")
+    data = read_data("./././data/property_sales.csv")
     features = data[0].copy()
     labels = data[1].copy()
 

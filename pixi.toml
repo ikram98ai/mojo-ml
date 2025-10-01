@@ -6,9 +6,9 @@ platforms = ["linux-64"]
 version = "0.1.0"
 
 [tasks]
-lifev1 = "mojo run life_game/lifev1.mojo"
-unilin = "mojo run linear_regression/univariate_regression.mojo"
-linear = "mojo run linear_regression/linear_regression.mojo"
+lifev1 = "mojo run src/life_game/lifev1.mojo"
+unilin = "mojo run src/linear_regression/univariate_regression.mojo"
+linear = "mojo run src/linear_regression/linear_regression.mojo"
 
 
 [dependencies]
