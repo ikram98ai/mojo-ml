@@ -91,13 +91,54 @@ struct LogisticRegression:
         cost = (cost_sum/m ) + (self.wd/(2*m)*reg_cost)
         return cost
 
+def show_metrics(actuals: List[Float32], predictions: List[Float32]):
+    true_positive = 0
+    true_negative = 0
+    false_positive = 0
+    false_negative = 0    
+
+    for y,y_hat in zip(actuals,predictions):
+        if y == 1 and y_hat == 1:
+            true_positive +=1
+        elif y == 0 and y_hat == 0:
+            true_negative +=1
+        elif y == 1 and y_hat == 0:
+            false_negative +=1
+        elif y == 0 and y_hat == 1:
+            false_positive +=1     
+        else:
+            print("wrong comparision")   
+
+    print("\nClassification Evaluation Metrics\n")
+    print(String(
+          "TP:{} The count of correct predictions of the positive labels y=1 y^=1\n"
+          "FP:{} (type 1 error) The count of wrong prediction of negative labels y=0 y^=1\n"
+          "FN:{} (type 2 error) The count of wrong prediction of positive lables y=1 y^=0\n"
+          "TN:{} The count of correct predictions of the negative labels y=0 y^=0\n"
+        ).format(true_positive,false_positive,false_negative,true_negative))
+
+    m = len(actuals)
+    accuracy = (true_positive + true_negative)/m
+    precision = true_positive / (true_positive + true_negative)
+    recall = true_positive / (true_positive + false_negative)
+    print("Accuracy: ",accuracy)
+    print("Precision: ",precision)
+    print("Recall: ",recall)
 
 def main():
     data = load_data("./././data/heart_disease.csv")
     features = data[0].copy()
     labels = data[1].copy()
+    split = Int(len(features) * 0.8)
 
+    xtrain = features[:split].copy()
+    ytrain = labels[:split].copy()
+    xtest = features[split:].copy()
+    ytest = labels[split:].copy()
+    print(String("Train size: {}, Test size: {}").format(len(xtrain),len(xtest)))
     var model = LogisticRegression(lr=0.0001, wd=0.009,iter=20)
-    model.fit(features, labels)
+    model.fit(xtrain, ytrain)
 
-    print(model(features[:5]).__str__())
+    preds = model(xtest)
+    show_metrics(ytest,preds)
+ 
