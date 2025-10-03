@@ -37,7 +37,7 @@ struct LogisticRegression:
     fn _sigmoid(self, z: Float32)-> Float32:
         return 1/( 1 + math.exp(-z))
 
-    fn __call__(self, x:row_type)-> Float32:
+    fn __call__(self, x:row_type )-> Float32:
         z = (x * self.w).reduce_add() + self.b
         a = self._sigmoid(z)
         return a
@@ -58,7 +58,7 @@ struct LogisticRegression:
             for x,y in zip(X,Y):
                 z = (x*self.w).reduce_add() + self.b
                 a = self._sigmoid(z)
-                err = -(y * math.log(a)) -(1-y)*math.log(1-a)
+                err = a - y
 
                 # for j in range(simd_width):
                 #     dw[j] = dw[j] + err * x[j]
@@ -97,7 +97,8 @@ def show_metrics(actuals: List[Float32], predictions: List[Float32]):
     false_positive = 0
     false_negative = 0    
 
-    for y,y_hat in zip(actuals,predictions):
+    for y,pred in zip(actuals,predictions):
+        y_hat = Int(pred > 0.5)
         if y == 1 and y_hat == 1:
             true_positive +=1
         elif y == 0 and y_hat == 0:
@@ -119,7 +120,7 @@ def show_metrics(actuals: List[Float32], predictions: List[Float32]):
 
     m = len(actuals)
     accuracy = (true_positive + true_negative)/m
-    precision = true_positive / (true_positive + true_negative)
+    precision = true_positive / (true_positive + false_positive)
     recall = true_positive / (true_positive + false_negative)
     print("Accuracy: ",accuracy)
     print("Precision: ",precision)
@@ -136,7 +137,7 @@ def main():
     xtest = features[split:].copy()
     ytest = labels[split:].copy()
     print(String("Train size: {}, Test size: {}").format(len(xtrain),len(xtest)))
-    var model = LogisticRegression(lr=0.0001, wd=0.009,iter=20)
+    var model = LogisticRegression(lr=0.0, wd=0.1,iter=100)
     model.fit(xtrain, ytrain)
 
     preds = model(xtest)
