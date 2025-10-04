@@ -10,6 +10,7 @@ lifev1 = "mojo run src/life_game/lifev1.mojo"
 unilin = "mojo run src/linear_regression/univariate_regression.mojo"
 linear = "mojo run src/linear_regression/main.mojo"
 logistic = "mojo run src/logistic_regression/main.mojo"
+neuralnet = "mojo run src/neural_network/main.mojo"
 
 
 [dependencies]
