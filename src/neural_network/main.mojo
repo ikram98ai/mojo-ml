@@ -17,8 +17,8 @@ def load_data(file_path:String)-> (List[List[Float32]], List[Float32]):
 struct Linear(Copyable, Movable):
     var w: List[List[Float32]]
     var b: List[Float32]
-
-    fn __init__(out self, input:Int, output:Int):
+    var act: Bool
+    fn __init__(out self, input:Int, output:Int, act:Bool = True):
         """
         shape(3,2).
     
@@ -26,6 +26,7 @@ struct Linear(Copyable, Movable):
             d   e   f   *   m  n    =   k*d + m*b + o*c     l*a + n*b + p*c     =   w   x
             g   h   i       o  p        k*g + m*b + o*c     l*a + n*b + p*c         y   z
         """
+        self.act=act
         random.seed(42)
         self.w = List[List[Float32]]()
         self.b = List[Float32]()
@@ -53,12 +54,34 @@ struct Linear(Copyable, Movable):
                 for k in range(n1):
                     z += x[i][k] * self.w[k][j]
                 z+= self.b[i]
-                row.append(self._sigmoid(z))
+                if self.act:
+                    row.append(self._relu(z))
+                else:
+                    row.append(z)
             c.append(row.copy())
         return c^
 
     fn _sigmoid(self, z:Float32)->Float32:
-        return 1/(1 + math.exp(-z))           
+        return 1/(1 + math.exp(-z))   
+
+    fn _relu(self, z:Float32)->Float32:
+        return z if z>0 else 0 
+
+fn softmax(z:List[List[Float32]]) -> List[Float32]:
+    output = List[Float32]()
+    for i in range(len(z)):
+        z_sum = Float32(0)
+        for j in range(len(z[0])):
+            z_sum += math.exp(z[i][j])
+        max = Float32(0)
+        for j in range(len(z[0])):
+            new = math.exp(z[i][j])/z_sum
+            if new > max:
+                max = new
+
+        output.append(max)
+    return output^
+
 
 def main():
     data = load_data("./././data/heart_disease.csv")
@@ -66,9 +89,9 @@ def main():
     
     var layers: List[Linear] = [ 
         Linear(13,8),
-        Linear(8,4),
-        Linear(4,2),
-        Linear(2,1),
+        Linear(8,4,act=False),
+        # Linear(4,2),
+        # Linear(2,1),
     ]
 
     var a:List[List[Float32]] = x^
@@ -76,8 +99,11 @@ def main():
     for i,l in enumerate(layers):
         a = l(a).copy()
         print(String("shape of layer_{}: ({},{})").format(i,len(a),len(a[0])))
-    
+    pred = softmax(a)
     for i in range(10):
-        for j in range(len(a[0])):
-            print(a[i][j],end="    ")
-        print()
+        print(pred[i])
+        
+    # for i in range(10):
+    #     for j in range(len(a[0])):
+    #         print(a[i][j],end="    ")
+    #     print()
