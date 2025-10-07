@@ -21,12 +21,13 @@ struct Value(Stringable, Writable, Copyable, Movable, Hashable, EqualityComparab
             return String.write(self)
 
     fn write_to(self, mut writer: Some[Writer]):
+        self_label = String(self.label,"(d:",self.data,"|g:",self.grad,")")
         if len(self._prev) == 1 :
-            writer.write(self._prev[0].data,self._op," = ", self.data)
+            writer.write(self._prev[0].label,"(",self._prev[0].data,")",self._op," = ", self_label)
         elif len(self._prev) == 2 :
-            writer.write(self._prev[0].data,self._op, self._prev[1].data," = ", self.data)
+            writer.write(self._prev[0].label,"(",self._prev[0].data,")",self._op,self._prev[1].label,"(", self._prev[1].data,")"," = ", self_label)
         else:
-            writer.write(self.data)
+            writer.write(self_label)
 
 
     fn __copyinit__(out self, existing: Self):
@@ -71,9 +72,9 @@ struct Value(Stringable, Writable, Copyable, Movable, Hashable, EqualityComparab
 
 
 def main():
-    v = Value(0)
-    v1 = Value(3)
-    v2 = v+v1
-    v3 = v/v1
+    v1 = Value(8,label='v1')
+    v2 = Value(3,label='v2')
+    v3 = v2/v1
+    v3.label = "v3"
     
     print(v3)
